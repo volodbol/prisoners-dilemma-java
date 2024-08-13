@@ -15,12 +15,14 @@
 	<description>Prisoner`s dilemma quick web application</description>
 	<properties>
 		<java.version>17</java.version>
+		<cache.ben-manes.caffeine>3.1.8</cache.ben-manes.caffeine>
 		<apache.commons.collections>4.4</apache.commons.collections>
+		<apache.commons.lang>3.16.0</apache.commons.lang>
 	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -28,9 +30,20 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.github.ben-manes.caffeine</groupId>
+			<artifactId>caffeine</artifactId>
+			<version>${cache.ben-manes.caffeine}</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
 			<version>${apache.commons.collections}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>${apache.commons.lang}</version>
 		</dependency>
 
 		<dependency>
