@@ -13,11 +13,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import static java.util.Objects.nonNull;
 
 @Service
-public class GameServiceInMemory implements GameService {
+public class GameServiceImpl implements GameService {
 
     private final ConcurrentHashMap<GameId, Game> games;
 
-    public GameServiceInMemory() {
+    public GameServiceImpl() {
         this.games = new ConcurrentHashMap<>();
         var game = Game.prisonersBasic();
         this.games.put(game.id(), game);

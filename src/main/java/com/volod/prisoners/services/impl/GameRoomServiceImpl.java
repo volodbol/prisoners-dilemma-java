@@ -8,7 +8,6 @@ import com.volod.prisoners.domain.game.Decision;
 import com.volod.prisoners.domain.game.GameRoom;
 import com.volod.prisoners.domain.id.GameId;
 import com.volod.prisoners.domain.id.GameRoomId;
-import com.volod.prisoners.services.GameRoomService;
 import com.volod.prisoners.services.GameService;
 import org.springframework.stereotype.Service;
 
@@ -17,13 +16,13 @@ import java.time.Duration;
 import static java.util.Objects.nonNull;
 
 @Service
-public class GameRoomServiceInMemory implements GameRoomService {
+public class GameRoomServiceImpl implements com.volod.prisoners.services.GameRoomService {
 
     private final GameService gameService;
 
     private final Cache<GameRoomId, GameRoom> gameRoomCache;
 
-    public GameRoomServiceInMemory(
+    public GameRoomServiceImpl(
             GameService gameService
     ) {
         this.gameService = gameService;
