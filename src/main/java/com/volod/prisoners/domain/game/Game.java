@@ -12,7 +12,7 @@ public record Game(
 
     public static Game prisonersBasic() {
         return Game.of(
-                "Prisoners Basic",
+                "Prisoner's Basic",
                 """
                         Always Cooperate: Always chooses to cooperate, regardless of the opponent's previous moves.
                         Always Defect: Always chooses to defect, no matter what the opponent does.
