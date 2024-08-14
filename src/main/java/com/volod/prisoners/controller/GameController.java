@@ -31,6 +31,11 @@ public class GameController {
     // WebSockets
     private final SimpMessagingTemplate simpMessagingTemplate;
 
+    @GetMapping("/")
+    public String index() {
+        return "redirect:/games";
+    }
+
     @GetMapping("/games")
     public String getGames(Model model) {
         var games = this.gameService.getGames();
