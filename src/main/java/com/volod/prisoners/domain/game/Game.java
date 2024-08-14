@@ -5,12 +5,14 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public record Game(
         GameId id,
+        String name,
         String description,
         Pair<String, String> decisions
 ) {
 
     public static Game prisonersBasic() {
         return Game.of(
+                "Prisoners Basic",
                 """
                         Always Cooperate: Always chooses to cooperate, regardless of the opponent's previous moves.
                         Always Defect: Always chooses to defect, no matter what the opponent does.
@@ -25,11 +27,13 @@ public record Game(
     }
 
     public static Game of(
+            String name,
             String description,
             Pair<String, String> decisions
     ) {
         return new Game(
                 GameId.random(),
+                name,
                 description,
                 decisions
         );
