@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Game Room</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.4.0/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        .description {
+            white-space: pre-line;
+            text-align: left;
+        }
+
+        ul#decisions {
+            padding-left: 0;
+            list-style-type: none;
+            margin: 0;
+        }
+
+        ul#decisions li {
+            margin: 10px 0;
+            padding: 10px 0;
+            position: relative;
+        }
+
+        ul#decisions li:nth-child(even)::after {
+            content: "";
+            display: block;
+            width: 100%;
+            height: 1px;
+            background-color: #ddd;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+        }
+
+        .share-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .share-text {
+            font-size: 20px;
+            margin-right: 10px;
+        }
+
+        .copy-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .copy-button:hover {
+            background-color: #45a049;
+        }
+
+        .blur {
+            color: transparent;
+            text-shadow: 0 0 8px #000;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Game Room: <span th:text="${gameRoom.id().value()}"></span></h1>
+    <h1><span th:text="${gameRoom.game().name()}"></span></h1>
+    <div class="share-container">
+        <div class="share-text">Share room with friend!</div>
+        <button class="copy-button" onclick="copyLink()">Copy Link</button>
+    </div>
+    <p class="description"><span th:text="${gameRoom.game().description()}"></span></p>
+
+    <h2>Make a Decision</h2>
+    <div>
+        <button id="decision-button-left"
+                th:data-decision="${gameRoom.game().decisions().getLeft()}"
+                onclick="sendDecision(this.getAttribute('data-decision'))">
+            <span th:text="${gameRoom.game().decisions().getLeft()}"></span>
+        </button>
+        <button id="decision-button-right"
+                th:data-decision="${gameRoom.game().decisions().getRight()}"
+                onclick="sendDecision(this.getAttribute('data-decision'))">
+            <span th:text="${gameRoom.game().decisions().getRight()}"></span>
+        </button>
+    </div>
+
+    <h2>Decisions:</h2>
+    <ul id="decisions">
+        <li th:each="decision : ${reversedDecisions}">
+            <span th:text="${decision.userId().equals(userId) ? 'You' : 'Opponent'}"></span>: <span
+                th:text="${decision.value()}"></span>
+        </li>
+    </ul>
+</div>
+
+<script type="text/javascript">
+    let stompClient = null;
+    let userMadeDecision = false;
+    let opponentMadeDecision = false;
+    let isRoundOver = '[[${isRoundOver}]]'
+    const roomId = '[[${gameRoom.id().value()}]]'
+    const userId = '[[${userId.value()}]]'
+
+    function connect() {
+        const socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame)
+            stompClient.subscribe('/topic/room/' + roomId, function (decision) {
+                isRoundOver = !isRoundOver
+                const decisionObj = JSON.parse(decision.body)
+                this.updateDecisionState(decisionObj)
+                this.showDecision(decisionObj)
+            });
+        });
+    }
+
+    function sendDecision(value) {
+        if (stompClient) {
+            stompClient.send("/app/play/" + roomId, {}, JSON.stringify({
+                gameRoomId: roomId,
+                userId: userId,
+                value: value
+            }));
+            userMadeDecision = true;
+            this.updateButtonStates()
+        } else {
+            console.error('STOMP client is not connected');
+        }
+    }
+
+    function updateDecisionState(decision) {
+        if (decision.userId.value === userId) {
+            userMadeDecision = true
+            opponentMadeDecision = false
+        } else {
+            userMadeDecision = false
+            opponentMadeDecision = true
+        }
+        updateButtonStates();
+    }
+
+    function updateButtonStates() {
+        const decisionButtons = document.querySelectorAll('button[id^="decision-button"]');
+        decisionButtons.forEach(button => {
+            button.disabled = userMadeDecision && !opponentMadeDecision;
+        });
+    }
+
+    function showDecision(decision) {
+        const decisions = document.getElementById('decisions');
+        const li = document.createElement('li');
+        const userLabel = userMadeDecision ? 'You' : 'Opponent'
+        decisions.querySelectorAll('li').forEach(li => {
+            li.classList.remove('blur');
+        });
+        if (opponentMadeDecision && !isRoundOver) {
+            li.classList.add('blur')
+        }
+        li.textContent = `${userLabel}: ${decision.value}`;
+        while (decisions.children.length >= 10) {
+            decisions.removeChild(decisions.lastChild);
+        }
+        decisions.insertBefore(li, decisions.firstChild);
+    }
+
+    function copyLink() {
+        const currentUrl = window.location.href;
+        navigator.clipboard.writeText(currentUrl).then(() => {
+            alert('Link copied to clipboard!');
+        }).catch(err => {
+            alert('Failed to copy the link');
+            console.error('Failed to copy: ', err);
+        });
+    }
+
+    connect();
+</script>
+</body>
+</html>
