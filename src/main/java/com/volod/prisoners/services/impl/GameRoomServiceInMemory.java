@@ -52,7 +52,7 @@ public class GameRoomServiceInMemory implements GameRoomService {
     public void saveDecision(Decision decision) {
         try {
             var gameRoom = this.get(decision.gameRoomId());
-            gameRoom.decisions().add(decision);
+            gameRoom.add(decision);
         } catch (GameRoomNotFoundException ignored) {
             // ignored
         }
